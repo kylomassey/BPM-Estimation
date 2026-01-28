@@ -27,8 +27,10 @@ for f in range(len(frame[0])):
     fft = numpy.fft.rfft(windowed)
     spectrum.append(numpy.abs(fft) **2)
 spectrum = numpy.array(spectrum).T
+print(spectrum)
 fft_db = 20 * numpy.log10(spectrum/numpy.max(spectrum) + 1e-10)
 time = numpy.arange(len(spectrum)) * ((framel*.5)/sr)
+print(fft_db)
 fft_db = numpy.maximum(fft_db, -80)
 plt.imshow(
     fft_db,
@@ -39,4 +41,4 @@ plt.imshow(
 plt.colorbar(label='dB')
 plt.xlabel("Time frames")
 plt.ylabel("Frequency bins")
-plt.show()
+plt.savefig("Spectrogram.png", dpi = 300, bbox_inches = "tight")
