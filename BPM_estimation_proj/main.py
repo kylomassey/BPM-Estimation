@@ -30,6 +30,6 @@ def main():
     spectrum = spectrogram(framed_audio, hop_time)
 
     #Divides up the fft spectrum into frequency ranges
-    spectrum = freq_range(spectrum, frame_len, sample_rate)
+    spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
 
 main()

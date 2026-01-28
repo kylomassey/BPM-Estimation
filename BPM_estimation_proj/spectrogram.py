@@ -17,7 +17,7 @@ def displaySpectrogram(spectrum, hop_time):
     plt.colorbar(label='dB')
     plt.xlabel("Time frames")
     plt.ylabel("Frequency bins")
-    plt.savefig("Spectrogram.png", dpi = 300, bbox_inches = "tight")
+    plt.savefig("BPM_estimation_proj/charts/Spectrogram.png", dpi = 300, bbox_inches = "tight")
 
 def spectrogram(audio, hop_time):
     spectrum = []
