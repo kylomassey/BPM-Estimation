@@ -5,6 +5,7 @@ import librosa
 import matplotlib.pyplot as plt
 from spectrogram import spectrogram
 from frequency_ranges import freq_range
+from visualization import displaySpectrogram
 import numpy
 
 def main():
@@ -28,6 +29,7 @@ def main():
     #Spectrogram takes the framed values and executes the fourier transform on each frame
     #it also saves the spectrogram to the main project folder
     spectrum = spectrogram(framed_audio, hop_time)
+    displaySpectrogram(spectrum=spectrum, hop_time=hop_time)
 
     #Divides up the fft spectrum into frequency ranges
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
