@@ -57,7 +57,7 @@ def harmScor(corr, laglow, laghigh):
     #print (scores[16], " ", scores[28])
     return numpy.argmax(scores)
 
-path = "./music/queen.mp3"
+path = "./music/effi.mp3"
 y, sr = librosa.load(path, sr=None)
 print(sr)
 framel =  sr * .05

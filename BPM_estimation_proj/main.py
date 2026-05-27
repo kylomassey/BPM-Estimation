@@ -18,7 +18,7 @@ def main():
     #the hop length signifies the number of frames each frame length is pushed. For example [1,2,3,4,5,6,7,8] frame lenth 4 hop length 2 returns
     #[[1,2,3,4], [3,4,5,6], [5,6,7,8]]. librosa.util.frame returns this but instead transposed for convenience 
     
-    path = "./music/queen.mp3"
+    path = "./music/effi.mp3"
     y, sample_rate = librosa.load(path, sr=None)
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
@@ -43,11 +43,10 @@ def main():
 
     #Compute high and low lag based on expected bpm range calculated by dividing 60 by the hop time then the high and low bpm thresholds
     bpm_low = 60
-    bpm_high = 180 
+    bpm_high = 300 
 
     lag_low = int(60 / hop_time / bpm_high)
     lag_high = int(60 / hop_time / bpm_low)
-    print(lag_low, " ", lag_high)
 
     #Creates and array of bpm buckets correlated to each lag value within the range
     bpm_graph = numpy.divide(60, numpy.multiply(numpy.arange(lag_low, lag_high + 1),hop_time))
@@ -61,8 +60,14 @@ def main():
     sub_bass_correlation_bpm = bpm_graph[numpy.argmax(sub_bass_correlation)]
     bass_correlation_bpm = bpm_graph[numpy.argmax(bass_correlation)]
 
-    print(len(master_correlation))
     print("master corr: ", master_correlation_bpm, "\nsub bass corr: ", sub_bass_correlation_bpm, "\nbass correlation: ", bass_correlation_bpm)
+
+    #Computes the harmonic scoring using the auto correlation data
+    master_harmonic_scoring = bpm_graph[harmonic_scoring(master_correlation, lag_low, lag_high)]
+    sub_bass_harmonic_scoring = bpm_graph[harmonic_scoring(sub_bass_correlation, lag_low, lag_high)]
+    bass_harmonic_scoring = bpm_graph[harmonic_scoring(bass_correlation, lag_low, lag_high)]
+
+    print("master harm score: ", master_harmonic_scoring, "\nsub bass harm score: ", sub_bass_harmonic_scoring, "\nbass harm score", bass_harmonic_scoring)
     
 
 main()
