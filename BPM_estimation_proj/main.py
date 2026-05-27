@@ -7,6 +7,7 @@ from spectrogram import spectrogram
 from frequency_ranges import freq_range
 from visualization import displaySpectrogram
 from novelty_curve import process_band
+from BPM_estimation import auto_correlation, harmonic_scoring
 import numpy
 
 def main():
@@ -39,5 +40,7 @@ def main():
     master_curve = process_band(spectrum.full_range, hop_time, frame_len)
     sub_bass_curve = process_band(spectrum.sub_bass_range, hop_time, frame_len)
     bass_curve = process_band(spectrum.bass_range, hop_time, frame_len)
+
+
 
 main()
