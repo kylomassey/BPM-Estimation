@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from spectrogram import spectrogram
 from frequency_ranges import freq_range
 from visualization import displaySpectrogram
+from novelty_curve import process_band
 import numpy
 
 def main():
@@ -33,5 +34,10 @@ def main():
 
     #Divides up the fft spectrum into frequency ranges
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
+
+    #Computes the onset curves for each frequency band
+    master_curve = process_band(spectrum.full_range, hop_time, frame_len)
+    sub_bass_curve = process_band(spectrum.sub_bass_range, hop_time, frame_len)
+    bass_curve = process_band(spectrum.bass_range, hop_time, frame_len)
 
 main()

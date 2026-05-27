@@ -12,3 +12,6 @@ def smooth_curve(onset, frame_len):
     kernel = numpy.ones(frame_len, dtype=float)
     smooth = numpy.convolve(onset, kernel, mode="same")
     return smooth
+
+def process_band(spec, hop, frame):
+    return smooth_curve(onset= onset_curve(spectrum=spec, hop_time=hop), frame_len=frame)
