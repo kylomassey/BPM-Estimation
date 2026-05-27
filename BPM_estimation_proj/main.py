@@ -41,6 +41,13 @@ def main():
     sub_bass_curve = process_band(spectrum.sub_bass_range, hop_time, frame_len)
     bass_curve = process_band(spectrum.bass_range, hop_time, frame_len)
 
+    #Compute high and low lag based on expected bpm range
+    bpm_low = 60
+    bpm_high = 180 
 
+    laglow = int(60 / hop_time / bpm_high)
+    laghigh = int(60 / hop_time / bpm_low)
+
+    
 
 main()
