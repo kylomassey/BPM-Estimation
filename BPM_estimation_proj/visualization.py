@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy
 
-def displaySpectrogram(spectrum, hop_time):
+def display_spectrogram(spectrum, hop_time):
     spectrum_db =  20 * numpy.log10(spectrum / numpy.max(spectrum) + 1e-10)
     time_scale = numpy.arange(spectrum.shape[1]) * hop_time
     freq_scale = numpy.arange(spectrum.shape[0]) * 20

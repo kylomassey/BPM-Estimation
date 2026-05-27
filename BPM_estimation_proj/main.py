@@ -5,7 +5,7 @@ import librosa
 import matplotlib.pyplot as plt
 from spectrogram import spectrogram
 from frequency_ranges import freq_range
-from visualization import displaySpectrogram
+from visualization import display_spectrogram
 from novelty_curve import process_band
 from BPM_estimation import auto_correlation, harmonic_scoring
 import numpy
@@ -18,7 +18,7 @@ def main():
     #the hop length signifies the number of frames each frame length is pushed. For example [1,2,3,4,5,6,7,8] frame lenth 4 hop length 2 returns
     #[[1,2,3,4], [3,4,5,6], [5,6,7,8]]. librosa.util.frame returns this but instead transposed for convenience 
     
-    path = "C:/Users/PC/Desktop/bpm-estimator/music/effi.mp3"
+    path = "./music/queen.mp3"
     y, sample_rate = librosa.load(path, sr=None)
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
@@ -30,24 +30,39 @@ def main():
 
     #Spectrogram takes the framed values and executes the fourier transform on each frame
     #it also saves the spectrogram to the main project folder
-    spectrum = spectrogram(framed_audio, hop_time)
-    displaySpectrogram(spectrum=spectrum, hop_time=hop_time)
+    spectrum = spectrogram(framed_audio)
+    display_spectrogram(spectrum=spectrum, hop_time=hop_time)
 
     #Divides up the fft spectrum into frequency ranges
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
 
     #Computes the onset curves for each frequency band
-    master_curve = process_band(spectrum.full_range, hop_time, frame_len)
-    sub_bass_curve = process_band(spectrum.sub_bass_range, hop_time, frame_len)
-    bass_curve = process_band(spectrum.bass_range, hop_time, frame_len)
+    master_curve = process_band(spectrum.full_range, hop_time)
+    sub_bass_curve = process_band(spectrum.sub_bass_range, hop_time)
+    bass_curve = process_band(spectrum.bass_range, hop_time)
 
-    #Compute high and low lag based on expected bpm range
+    #Compute high and low lag based on expected bpm range calculated by dividing 60 by the hop time then the high and low bpm thresholds
     bpm_low = 60
     bpm_high = 180 
 
-    laglow = int(60 / hop_time / bpm_high)
-    laghigh = int(60 / hop_time / bpm_low)
+    lag_low = int(60 / hop_time / bpm_high)
+    lag_high = int(60 / hop_time / bpm_low)
+    print(lag_low, " ", lag_high)
 
+    #Creates and array of bpm buckets correlated to each lag value within the range
+    bpm_graph = numpy.divide(60, numpy.multiply(numpy.arange(lag_low, lag_high + 1),hop_time))
+
+    #Computes autocorrelation to determine first estimated bpm
+    master_correlation = auto_correlation(master_curve, lag_low, lag_high)
+    sub_bass_correlation = auto_correlation(sub_bass_curve, lag_low, lag_high)
+    bass_correlation = auto_correlation(bass_curve, lag_low, lag_high)
+
+    master_correlation_bpm = bpm_graph[numpy.argmax(master_correlation)]
+    sub_bass_correlation_bpm = bpm_graph[numpy.argmax(sub_bass_correlation)]
+    bass_correlation_bpm = bpm_graph[numpy.argmax(bass_correlation)]
+
+    print(len(master_correlation))
+    print("master corr: ", master_correlation_bpm, "\nsub bass corr: ", sub_bass_correlation_bpm, "\nbass correlation: ", bass_correlation_bpm)
     
 
 main()

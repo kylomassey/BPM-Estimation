@@ -57,7 +57,7 @@ def harmScor(corr, laglow, laghigh):
     #print (scores[16], " ", scores[28])
     return numpy.argmax(scores)
 
-path = "C:/Users/PC/Desktop/bpm-estimator/music/queen.mp3"
+path = "./music/queen.mp3"
 y, sr = librosa.load(path, sr=None)
 print(sr)
 framel =  sr * .05
@@ -95,11 +95,12 @@ lowmid_smooth = smooth(lowmid_onset, int(.1/(hop)))
 highmid_smooth = smooth(highmid_onset, int(.1/hop))
 high_smooth = smooth(high_onset, int(.1/hop))
 
-laglow = int(60 / hop / 180)
+laglow = int(60 / hop / 300)
 laghigh = int(60 / hop / 60)
 print(laglow, " ", laghigh)
 bpm_graph =  numpy.divide(60, numpy.multiply(numpy.arange(laglow,laghigh+1),hop))
 master_corr = autoCorr(master_smooth, laglow, laghigh)
+print(len(master_corr))
 bpm = bpm_graph[numpy.argmax(master_corr)]
 bpm2 = bpm_graph[harmScor(master_corr, laglow, laghigh)]
 print("The BPM of this audio is: ", bpm, " or ", bpm2)
