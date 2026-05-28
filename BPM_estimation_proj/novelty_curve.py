@@ -1,7 +1,7 @@
 import numpy
 
 def onset_curve(spectrum, hop_time):
-    spectrum =  numpy.mean(spectrum, axis=0)
+    spectrum =  numpy.sum(spectrum, axis=0)
     return numpy.maximum(numpy.diff(spectrum)/hop_time, 0)
 
 def smooth_curve(onset, framel):
@@ -18,4 +18,4 @@ def smooth_curve(onset, framel):
     #return smooth
 
 def process_band(spec, hop):
-    return smooth_curve(onset= onset_curve(spectrum=spec, hop_time=hop), framel=int(.1/hop))
+    return smooth_curve(onset= onset_curve(spectrum=spec, hop_time=hop), framel=max(1,int(.1/hop)))

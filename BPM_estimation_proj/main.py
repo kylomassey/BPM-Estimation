@@ -18,7 +18,7 @@ def main():
     #the hop length signifies the number of frames each frame length is pushed. For example [1,2,3,4,5,6,7,8] frame lenth 4 hop length 2 returns
     #[[1,2,3,4], [3,4,5,6], [5,6,7,8]]. librosa.util.frame returns this but instead transposed for convenience 
     
-    path = "./music/speed_demon.mp3"
+    path = "./music/effi.mp3"
     y, sample_rate = librosa.load(path, sr=None)
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
@@ -43,7 +43,7 @@ def main():
 
     #Compute high and low lag based on expected bpm range calculated by dividing 60 by the hop time then the high and low bpm thresholds
     bpm_low = 60
-    bpm_high = 180
+    bpm_high = 220
 
     lag_low = int(60 / hop_time / bpm_high)
     lag_high = int(60 / hop_time / bpm_low)
