@@ -27,3 +27,20 @@ def harmonic_scoring(corr, laglow, laghigh):
         scores.append(total)
     #print (scores[16], " ", scores[28])
     return numpy.argmax(scores)
+
+def tempogram(onset, hop, laglow, laghigh):
+    tempogram = []
+    score = []
+    win_size = int(4/hop)
+    win_hop = int(win_size/4)
+    print(win_size, " ", win_hop, " ", len(onset))
+    for k in range(0, len(onset)-win_size+1, win_hop):
+        win =  onset[k : k + win_size]
+        corr = auto_correlation(win, laglow, laghigh)
+        if len(score) == 0:
+            score = numpy.zeros(len(corr))    
+        score[harmonic_scoring(corr,laglow,laghigh)] += 1
+        tempogram.append(corr)
+    print(score)
+    highscore = numpy.argmax(score)
+    return tempogram, highscore

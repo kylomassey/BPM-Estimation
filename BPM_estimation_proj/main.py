@@ -7,7 +7,7 @@ from spectrogram import spectrogram
 from frequency_ranges import freq_range
 from visualization import display_spectrogram
 from novelty_curve import process_band
-from BPM_estimation import auto_correlation, harmonic_scoring
+from BPM_estimation import auto_correlation, harmonic_scoring, tempogram
 import numpy
 
 def main():
@@ -18,7 +18,7 @@ def main():
     #the hop length signifies the number of frames each frame length is pushed. For example [1,2,3,4,5,6,7,8] frame lenth 4 hop length 2 returns
     #[[1,2,3,4], [3,4,5,6], [5,6,7,8]]. librosa.util.frame returns this but instead transposed for convenience 
     
-    path = "./music/effi.mp3"
+    path = "./music/simply_beautiful.mp3"
     y, sample_rate = librosa.load(path, sr=None)
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
@@ -43,7 +43,7 @@ def main():
 
     #Compute high and low lag based on expected bpm range calculated by dividing 60 by the hop time then the high and low bpm thresholds
     bpm_low = 60
-    bpm_high = 300 
+    bpm_high = 180
 
     lag_low = int(60 / hop_time / bpm_high)
     lag_high = int(60 / hop_time / bpm_low)
@@ -68,6 +68,8 @@ def main():
     bass_harmonic_scoring = bpm_graph[harmonic_scoring(bass_correlation, lag_low, lag_high)]
 
     print("master harm score: ", master_harmonic_scoring, "\nsub bass harm score: ", sub_bass_harmonic_scoring, "\nbass harm score", bass_harmonic_scoring)
+
+    master_tempogram, master_highscore = tempogram(master_curve, hop_time, lag_low, lag_high)
     
 
 main()
