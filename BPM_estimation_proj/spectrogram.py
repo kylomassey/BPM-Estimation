@@ -10,4 +10,4 @@ def spectrogram(audio):
         fft_audio_frame =  numpy.fft.rfft(windowed_audio_frame)
         spectrum.append(numpy.abs(fft_audio_frame) ** 2)
     spectrum = numpy.array(spectrum).T
-    return(spectrum)
+    return spectrum

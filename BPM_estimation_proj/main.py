@@ -5,7 +5,7 @@ import librosa
 import matplotlib.pyplot as plt
 from spectrogram import spectrogram
 from frequency_ranges import freq_range
-from visualization import display_spectrogram
+from visualization import display_spectrogram, display_tempogram
 from novelty_curve import process_band
 from BPM_estimation import auto_correlation, harmonic_scoring, tempogram
 import numpy
@@ -18,7 +18,7 @@ def main():
     #the hop length signifies the number of frames each frame length is pushed. For example [1,2,3,4,5,6,7,8] frame lenth 4 hop length 2 returns
     #[[1,2,3,4], [3,4,5,6], [5,6,7,8]]. librosa.util.frame returns this but instead transposed for convenience 
     
-    path = "./music/simply_beautiful.mp3"
+    path = "./music/speed_demon.mp3"
     y, sample_rate = librosa.load(path, sr=None)
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
@@ -48,6 +48,8 @@ def main():
     lag_low = int(60 / hop_time / bpm_high)
     lag_high = int(60 / hop_time / bpm_low)
 
+    print("lag low/bpm high:", lag_low, "/", bpm_high, "|| lag high/bpm low:", lag_high, " / ", bpm_low)
+
     #Creates and array of bpm buckets correlated to each lag value within the range
     bpm_graph = numpy.divide(60, numpy.multiply(numpy.arange(lag_low, lag_high + 1),hop_time))
 
@@ -70,6 +72,14 @@ def main():
     print("master harm score: ", master_harmonic_scoring, "\nsub bass harm score: ", sub_bass_harmonic_scoring, "\nbass harm score", bass_harmonic_scoring)
 
     master_tempogram, master_highscore = tempogram(master_curve, hop_time, lag_low, lag_high)
+    master_tempogram_bpm = bpm_graph[master_highscore]
+    sub_bass_tempogram, sub_bass_highscore = tempogram(sub_bass_curve, hop_time, lag_low, lag_high)
+    sub_bass_tempogram_bpm = bpm_graph[sub_bass_highscore]
+    bass_tempogram, bass_highscore = tempogram(bass_curve, hop_time, lag_low, lag_high)
+    bass_tempogram_bpm = bpm_graph[bass_highscore]
+
+    print("master tempogram score: ", master_tempogram_bpm, "\nsub bass tempogram score: ", sub_bass_tempogram_bpm, "\n bass tempogram score: ", bass_tempogram_bpm)
+    display_tempogram(master_tempogram, bpm_graph)
     
 
 main()
