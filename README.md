@@ -3,4 +3,6 @@
 # RUN
     
     navigate terminal to BPM_estation_proj
-    run: python -m src.main
+    
+    ```bash
+    python -m src.main
