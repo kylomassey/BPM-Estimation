@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy
 
-def display_spectrogram(spectrum, hop_time):
+def display_spectrogram(spectrum, hop_time, filename):
     spectrum_db =  20 * numpy.log10(spectrum / numpy.max(spectrum) + 1e-10)
     time_scale = numpy.arange(spectrum.shape[1]) * hop_time
     freq_scale = numpy.arange(spectrum.shape[0]) * 20
@@ -16,10 +16,10 @@ def display_spectrogram(spectrum, hop_time):
     plt.colorbar(label='dB')
     plt.xlabel("Time frames")
     plt.ylabel("Frequency bins")
-    plt.savefig("BPM_estimation_proj/charts/Spectrogram.png", dpi = 300, bbox_inches = "tight")
+    plt.savefig(f"charts\\{filename}_Spectrogram.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
 
-def display_tempogram(tempogram, bpm_scale):
+def display_tempogram(tempogram, bpm_scale, filename):
     n_lags = tempogram.shape[0]
     time_scale = numpy.arange(tempogram.shape[1])
     plt.imshow(
@@ -36,5 +36,5 @@ def display_tempogram(tempogram, bpm_scale):
     plt.colorbar(label='tempo strength')
     plt.xlabel("Time frames")
     plt.ylabel("lag bins")
-    plt.savefig("BPM_estimation_proj/charts/Tempogram.png", dpi = 300, bbox_inches = "tight")
+    plt.savefig(f"charts\\{filename}_Tempogram.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
