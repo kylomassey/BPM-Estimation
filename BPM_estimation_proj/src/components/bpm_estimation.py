@@ -21,7 +21,9 @@ def bpm_estimation(path, filename):
     print(sample_rate)
     frame_len =  int(sample_rate * .05)
     hop_len = int(frame_len * .25)
+    bin_size = sample_rate / frame_len
     framed_audio = librosa.util.frame(x = y, frame_length = frame_len, hop_length = hop_len)
+    print(framed_audio[300][350])
 
     #This signifies the amount of time passed between each hop
     hop_time = hop_len / sample_rate
@@ -29,7 +31,7 @@ def bpm_estimation(path, filename):
     #Spectrogram takes the framed values and executes the fourier transform on each frame
     #it also saves the spectrogram to the main project folder
     spectrum = spectrogram(framed_audio)
-    display_spectrogram(spectrum=spectrum, hop_time=hop_time, filename=filename)
+    display_spectrogram(spectrum=spectrum, hop_time=hop_time, filename=filename, bin_size=bin_size)
 
     #Divides up the fft spectrum into frequency ranges
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)

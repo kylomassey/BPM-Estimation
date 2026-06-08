@@ -10,3 +10,4 @@ class freq_range:
         self.brilliance = spectrum[int(6000*frame_len/sample_rate):int(20000*frame_len/sample_rate)]
         self.hop_len = hop_len
         self.hop_time = hop_len / sample_rate
+        self.bin_size = sample_rate / frame_len
