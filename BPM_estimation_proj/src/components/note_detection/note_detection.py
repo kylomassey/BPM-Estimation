@@ -53,6 +53,7 @@ def chord_analyzer():
     
     spectrum = spectrogram(framed_audio)
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
+    #start freq must be a multiple of the bin_size for accuracy
     sheet = note_detection(spectrum.full_range[round(520*frame_len/sample_rate):round(1015*frame_len/sample_rate)], bin_size, start_freq=520)
     chord_visualizer(sheet, "ode_to_joy")
     print(frame_len/sample_rate)
