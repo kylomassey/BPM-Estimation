@@ -5,7 +5,7 @@ def main():
     while restart:
         print("Please place the audio file in the music folder and enter the file name here:")
         filename = input()
-        path = f"music\\{filename}"
+        path = f"music/{filename}"
         restart = bpm_estimation(path, filename)
 
 main()

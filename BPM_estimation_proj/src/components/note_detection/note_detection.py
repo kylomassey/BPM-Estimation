@@ -11,6 +11,7 @@ def frequency_to_midi(frequency):
 def note_detection(spectrum, bin_size, start_freq=0):
     note_strength = numpy.zeros(12)
     sheet = []
+    cnt = 0
     for t in range(spectrum.shape[1]):
         threshold = 0.3 * spectrum[:,t].max()
         for f in range(spectrum.shape[0]):
@@ -18,7 +19,11 @@ def note_detection(spectrum, bin_size, start_freq=0):
                 continue
             else:
                 midi_number = frequency_to_midi((f * bin_size) + start_freq)
-                note_strength[int(midi_number) % 12] += spectrum[f,t]
+                if cnt < 15:
+                    print(midi_number)
+                    cnt += 1
+                note_strength[round(midi_number) % 12] += spectrum[f,t]
+        note_strength = numpy.where(note_strength < numpy.max(note_strength),0,note_strength)
         sheet.append(note_strength)
         note_strength = numpy.zeros(12)
 
@@ -31,7 +36,7 @@ def note_detection(spectrum, bin_size, start_freq=0):
 
 
 def chord_analyzer():
-    path = "music\\scale.mp3"
+    path = "music/ode_to_joy.mp3"
 
     try:
         y, sample_rate = librosa.load(path, sr=None)
@@ -48,8 +53,8 @@ def chord_analyzer():
     
     spectrum = spectrogram(framed_audio)
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
-    sheet = note_detection(spectrum.full_range[int(1*frame_len/sample_rate):int(4000*frame_len/sample_rate)], bin_size, start_freq=1)
+    sheet = note_detection(spectrum.full_range[round(520*frame_len/sample_rate):round(1015*frame_len/sample_rate)], bin_size, start_freq=520)
     chord_visualizer(sheet, "ode_to_joy")
-    print(sheet[5][150])
+    print(frame_len/sample_rate)
 
 chord_analyzer()
