@@ -1,0 +1,1 @@
+from .note_detection import chord_analyzer

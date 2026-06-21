@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy
 
 def display_spectrogram(spectrum, hop_time, filename, bin_size):
-    spectrum_db =  20 * numpy.log10(spectrum/numpy.mean(spectrum) + 1e-10)
+    spectrum_db =  20 * numpy.log10((spectrum / numpy.mean(spectrum)) + 1e-10)
     time_scale = numpy.arange(spectrum.shape[1]) * hop_time
     freq_scale = numpy.arange(spectrum.shape[0]) * bin_size
     spectrum_db = numpy.maximum(spectrum_db, -100)
@@ -39,7 +39,7 @@ def display_tempogram(tempogram, bpm_scale, filename):
     plt.savefig(f"charts/{filename}_Tempogram.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
 
-def chord_visualizer(sheet, filename):
+def display_chromagram(sheet, filename):
     sheet = 20 * numpy.log10(sheet/numpy.max(sheet) + 1e-10)
     sheet = numpy.maximum(sheet, -100)
     notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -55,4 +55,20 @@ def chord_visualizer(sheet, filename):
     plt.xlabel("Time frames")
     plt.ylabel("Pitch classes")
     plt.savefig(f"charts/{filename}_Chord_Visualization.png", dpi = 300, bbox_inches = "tight")
+    plt.clf()
+
+def display_ssm(sheet, hop_time, filename, factor = 1):
+    #sheet = 20 * numpy.log10(sheet/numpy.max(sheet) + 1e-10)
+    time_scale = numpy.arange(sheet.shape[1]) * hop_time * factor
+    plt.imshow(
+        sheet,
+        origin = "lower",
+        aspect = "auto",
+        cmap = "Spectral",
+        extent = [time_scale[0], time_scale[-1], time_scale[0], time_scale[-1]]
+        )
+    plt.colorbar(label='dB')
+    plt.xlabel("Time frames")
+    plt.ylabel("Time frames")
+    plt.savefig(f"charts/{filename}_ssm.png", dpi = 300, bbox_inches = "tight")
     plt.clf()

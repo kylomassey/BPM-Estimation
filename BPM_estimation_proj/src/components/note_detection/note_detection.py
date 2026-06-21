@@ -1,43 +1,40 @@
 import librosa
 import numpy
+from .adjustments import median_smoothing, diagonal_smoothing
 from ..spectrogram import spectrogram
 from ..frequency_ranges import freq_range
-from ..visualization import chord_visualizer
+from ..visualization import display_spectrogram, display_chromagram, display_ssm
+from .ssm import self_similarity_matrix
 
 def frequency_to_midi(frequency):
     midi_number = 69 + 12 * numpy.log2(frequency / 440.0)
     return midi_number
 
 def note_detection(spectrum, bin_size, start_freq=0):
-    note_strength = numpy.zeros(12)
-    sheet = []
-    cnt = 0
-    for t in range(spectrum.shape[1]):
-        threshold = 0.3 * spectrum[:,t].max()
-        for f in range(spectrum.shape[0]):
-            if spectrum[f,t] <= threshold:
-                continue
-            else:
-                midi_number = frequency_to_midi((f * bin_size) + start_freq)
-                if cnt < 15:
-                    print(midi_number)
-                    cnt += 1
-                note_strength[round(midi_number) % 12] += spectrum[f,t]
-        note_strength = numpy.where(note_strength < numpy.max(note_strength),0,note_strength)
-        sheet.append(note_strength)
-        note_strength = numpy.zeros(12)
+    n_freq = spectrum.shape[0]
 
-    #sheet = sheet / numpy.max(sheet)
+    frequencies = numpy.arange(n_freq) * bin_size + start_freq
+    midi = frequency_to_midi(frequencies)
+    pitch_classes = numpy.round(midi).astype(int) % 12
+
+    M = numpy.zeros((12,n_freq), dtype=spectrum.dtype)
+    M[pitch_classes, numpy.arange(n_freq)] = 1.0
+    sheet = M @ spectrum
+
     print(numpy.max(sheet))
     print(numpy.min(sheet))
     print(numpy.count_nonzero(sheet))
-    sheet = numpy.array(sheet).T
     return sheet
 
+def downsample_time(chroma, factor):
+    chroma = numpy.asarray(chroma, dtype=numpy.float32)
+    n = chroma.shape[1]
+    usable = (n // factor) * factor
+    blocks = chroma[:,:usable].reshape(12, usable // factor, factor)
+    return blocks.mean(axis=2)
 
-def chord_analyzer():
-    path = "music/ode_to_joy.mp3"
 
+def chord_analyzer(path, filename):
     try:
         y, sample_rate = librosa.load(path, sr=None)
     except FileNotFoundError:
@@ -52,10 +49,31 @@ def chord_analyzer():
     hop_time = hop_len / sample_rate
     
     spectrum = spectrogram(framed_audio)
-    spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
-    #start freq must be a multiple of the bin_size for accuracy
-    sheet = note_detection(spectrum.full_range[round(520*frame_len/sample_rate):round(1015*frame_len/sample_rate)], bin_size, start_freq=520)
-    chord_visualizer(sheet, "ode_to_joy")
-    print(frame_len/sample_rate)
 
-chord_analyzer()
+    display_spectrogram(spectrum, hop_time, filename, bin_size)
+
+    spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
+
+    #start freq must be a multiple of the bin_size for accuracy
+    sheet = note_detection(spectrum.full_range[round(bin_size*frame_len/sample_rate):], bin_size, start_freq=bin_size)
+
+    display_chromagram(sheet, filename)
+
+    #sheet = median_smoothing(sheet, 99)    
+
+    factor = 20
+    sheet = downsample_time(sheet, factor)
+
+    sheet = self_similarity_matrix(sheet)
+
+    sheet = diagonal_smoothing(sheet, 20)
+
+    display_ssm(sheet, hop_time, filename, factor)
+
+    print("would you like to analyze another song? (y/n)")
+    choice = input().lower()
+    if choice == 'y':
+        return True
+    else:
+        print("Thank you for using the BPM estimator!")
+        return False
