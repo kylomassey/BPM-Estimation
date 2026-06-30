@@ -1,6 +1,6 @@
 import librosa
 import numpy
-from .adjustments import median_smoothing, diagonal_smoothing
+from .adjustments import median_smoothing, diagonal_smoothing, downsample_time
 from ..spectrogram import spectrogram
 from ..frequency_ranges import freq_range
 from ..visualization import display_spectrogram, display_chromagram, display_ssm
@@ -25,14 +25,6 @@ def note_detection(spectrum, bin_size, start_freq=0):
     print(numpy.min(sheet))
     print(numpy.count_nonzero(sheet))
     return sheet
-
-def downsample_time(chroma, factor):
-    chroma = numpy.asarray(chroma, dtype=numpy.float32)
-    n = chroma.shape[1]
-    usable = (n // factor) * factor
-    blocks = chroma[:,:usable].reshape(12, usable // factor, factor)
-    return blocks.mean(axis=2)
-
 
 def chord_analyzer(path, filename):
     try:
