@@ -54,7 +54,7 @@ def display_chromagram(sheet, filename):
     plt.yticks(numpy.arange(12), notes)
     plt.xlabel("Time frames")
     plt.ylabel("Pitch classes")
-    plt.savefig(f"charts/{filename}_Chord_Visualization.png", dpi = 300, bbox_inches = "tight")
+    plt.savefig(f"charts/{filename}_Chromagram.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
 
 def display_ssm(sheet, hop_time, filename, factor = 1):
@@ -72,3 +72,24 @@ def display_ssm(sheet, hop_time, filename, factor = 1):
     plt.ylabel("Time frames")
     plt.savefig(f"charts/{filename}_ssm.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
+
+def display_chords(sheet, labels, filename):
+    sheet = 20 * numpy.log10(sheet/numpy.max(sheet) + 1e-10)
+    print(sheet.shape)
+    sheet = numpy.maximum(sheet, -100)
+    print(labels.shape)
+    chord_types= ["major", "minor", "dominant 7th", "minor 7th", "major 7th"]
+    for i in range(0,2):
+        plt.imshow(
+            sheet[numpy.arange(0+i,sheet.shape[0],2),:],
+            origin = "lower",
+            aspect = "auto",
+            cmap = "magma",
+            extent = [0, sheet.shape[1], 0, 12]
+            )
+        plt.colorbar(label='note strength')
+        plt.yticks(numpy.arange(12), labels[numpy.arange(0+i,labels.shape[0],2)])
+        plt.xlabel("Time frames")
+        plt.ylabel("Pitch classes")
+        plt.savefig(f"charts/{filename}_{chord_types[i]}_Chord_Visualization.png", dpi = 300, bbox_inches = "tight")
+        plt.clf()

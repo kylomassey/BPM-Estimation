@@ -1,30 +1,12 @@
 import librosa
 import numpy
+from .detection_tools import note_detection, match_chord
 from .adjustments import median_smoothing, diagonal_smoothing, downsample_time
 from ..spectrogram import spectrogram
 from ..frequency_ranges import freq_range
-from ..visualization import display_spectrogram, display_chromagram, display_ssm
+from ..visualization import display_spectrogram, display_chromagram, display_ssm, display_chords
 from .ssm import self_similarity_matrix
 
-def frequency_to_midi(frequency):
-    midi_number = 69 + 12 * numpy.log2(frequency / 440.0)
-    return midi_number
-
-def note_detection(spectrum, bin_size, start_freq=0):
-    n_freq = spectrum.shape[0]
-
-    frequencies = numpy.arange(n_freq) * bin_size + start_freq
-    midi = frequency_to_midi(frequencies)
-    pitch_classes = numpy.round(midi).astype(int) % 12
-
-    M = numpy.zeros((12,n_freq), dtype=spectrum.dtype)
-    M[pitch_classes, numpy.arange(n_freq)] = 1.0
-    sheet = M @ spectrum
-
-    print(numpy.max(sheet))
-    print(numpy.min(sheet))
-    print(numpy.count_nonzero(sheet))
-    return sheet
 
 def chord_analyzer(path, filename):
     try:
@@ -50,6 +32,11 @@ def chord_analyzer(path, filename):
     sheet = note_detection(spectrum.full_range[round(bin_size*frame_len/sample_rate):], bin_size, start_freq=bin_size)
 
     display_chromagram(sheet, filename)
+
+    chord_analysis, max_chord_analysis, chord_string, labels = match_chord(sheet)
+    print(labels)
+
+    display_chords(max_chord_analysis, numpy.array(labels), filename)
 
     #sheet = median_smoothing(sheet, 99)    
 
