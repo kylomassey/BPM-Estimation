@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy
 
-def display_spectrogram(spectrum, hop_time, filename, bin_size):
+def display_spectrogram(spectrum, hop_time, filename, bin_size = 1):
     spectrum_db =  20 * numpy.log10((spectrum / numpy.mean(spectrum)) + 1e-10)
     time_scale = numpy.arange(spectrum.shape[1]) * hop_time
     freq_scale = numpy.arange(spectrum.shape[0]) * bin_size
@@ -39,16 +39,16 @@ def display_tempogram(tempogram, bpm_scale, filename):
     plt.savefig(f"charts/{filename}_Tempogram.png", dpi = 300, bbox_inches = "tight")
     plt.clf()
 
-def display_chromagram(sheet, filename):
-    sheet = 20 * numpy.log10(sheet/numpy.max(sheet) + 1e-10)
-    sheet = numpy.maximum(sheet, -100)
+def display_chromagram(sheet, filename, hop_time):
+    sheet = sheet/(sheet.mean(axis=0, keepdims=True) + 1e-9)
+    time_scale = numpy.arange(sheet.shape[1]) * hop_time
     notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
     plt.imshow(
         sheet,
         origin = "lower",
         aspect = "auto",
         cmap = "magma",
-        extent = [0, sheet.shape[1], 0, 12]
+        extent = [time_scale[0], time_scale[-1], 0, 12]
         )
     plt.colorbar(label='note strength')
     plt.yticks(numpy.arange(12), notes)
@@ -74,7 +74,6 @@ def display_ssm(sheet, hop_time, filename, factor = 1):
     plt.clf()
 
 def display_chords(sheet, labels, filename):
-    sheet = 20 * numpy.log10(sheet/numpy.max(sheet) + 1e-10)
     print(sheet.shape)
     sheet = numpy.maximum(sheet, -100)
     print(labels.shape)

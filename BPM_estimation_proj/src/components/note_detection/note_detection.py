@@ -8,7 +8,7 @@ from ..visualization import display_spectrogram, display_chromagram, display_ssm
 from .ssm import self_similarity_matrix
 
 
-def chord_analyzer(path, filename):
+def stft_chord_analyzer(path, filename):
     try:
         y, sample_rate = librosa.load(path, sr=None)
     except FileNotFoundError:
@@ -23,18 +23,18 @@ def chord_analyzer(path, filename):
     hop_time = hop_len / sample_rate
     
     spectrum = spectrogram(framed_audio)
-
+    print("spectrogram done")
     display_spectrogram(spectrum, hop_time, filename, bin_size)
 
     spectrum = freq_range(spectrum, frame_len, sample_rate, hop_len)
 
     #start freq must be a multiple of the bin_size for accuracy
     sheet = note_detection(spectrum.full_range[round(bin_size*frame_len/sample_rate):], bin_size, start_freq=bin_size)
-
+    print("chromagram done")
     display_chromagram(sheet, filename)
 
     chord_analysis, max_chord_analysis, chord_string, labels = match_chord(sheet)
-    print(labels)
+    print("chordogram done")
 
     display_chords(max_chord_analysis, numpy.array(labels), filename)
 
@@ -49,8 +49,45 @@ def chord_analyzer(path, filename):
 
     display_ssm(sheet, hop_time, filename, factor)
 
-    print("would you like to analyze another song? (y/n)")
-    choice = input().lower()
+    choice = input("Would you like to analyze another song? (y/n): ")
+    choice = choice.lower()
+    if choice == 'y':
+        return True
+    else:
+        print("Thank you for using the BPM estimator!")
+        return False
+
+def cqt_chord_analyzer(path, filename):
+    try:
+        y, sample_rate = librosa.load(path, sr=None)
+    except FileNotFoundError:
+        print("File not found. Please check the file name and try again.")
+        return True
+    print(sample_rate)
+
+    y_harmonic, y_percussive = librosa.effects.hpss(y)
+    tuning = librosa.estimate_tuning(y=y_harmonic, sr=sample_rate)
+    fmin = librosa.note_to_hz('C1') * 2**(tuning / 12)
+    hop_len = 512
+    hop_time = hop_len/sample_rate
+
+    cqt = numpy.abs(librosa.cqt(y_harmonic, hop_length=hop_len, fmin=fmin, tuning=None))
+
+    display_spectrogram(cqt, hop_time, filename)
+
+    chromagram = cqt.reshape(7,12,cqt.shape[1]).sum(axis=0)
+
+    display_chromagram(chromagram, filename, hop_time)
+
+    chord_analysis, max_chord_analysis, chord_string, labels = match_chord(chromagram)
+    display_chords(max_chord_analysis, numpy.array(labels), filename)
+
+    totals = max_chord_analysis.sum(axis=1)
+    for i in numpy.argsort(totals)[::-1][:6]:
+        print(f"{labels[i]:10} {totals[i]:.1f}")
+    
+    choice = input("Would you like to analyze another song? (y/n): ")
+    choice = choice.lower()
     if choice == 'y':
         return True
     else:

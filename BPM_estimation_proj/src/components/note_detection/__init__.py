@@ -1,1 +1,1 @@
-from .note_detection import chord_analyzer
+from .note_detection import stft_chord_analyzer, cqt_chord_analyzer
