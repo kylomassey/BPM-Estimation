@@ -1,10 +1,11 @@
 import librosa
 import numpy
+from .hmm_viterbi import scores_to_emissions, viterbi
 from .detection_tools import note_detection, match_chord
 from .adjustments import median_smoothing, diagonal_smoothing, downsample_time
 from ..spectrogram import spectrogram
 from ..frequency_ranges import freq_range
-from ..visualization import display_spectrogram, display_chromagram, display_ssm, display_chords
+from ..visualization import display_spectrogram, display_chromagram, display_ssm, display_chords, display_viterbi
 from .ssm import self_similarity_matrix
 
 
@@ -81,6 +82,11 @@ def cqt_chord_analyzer(path, filename):
 
     chord_analysis, max_chord_analysis, chord_string, labels = match_chord(chromagram)
     display_chords(max_chord_analysis, numpy.array(labels), filename)
+
+    emissions = scores_to_emissions(chord_analysis)
+    viterbi_analysis = viterbi(emissions)
+
+    display_viterbi(emissions, viterbi_analysis, hop_time, filename)
 
     totals = max_chord_analysis.sum(axis=1)
     for i in numpy.argsort(totals)[::-1][:6]:

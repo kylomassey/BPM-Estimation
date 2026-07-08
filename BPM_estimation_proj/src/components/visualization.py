@@ -92,3 +92,28 @@ def display_chords(sheet, labels, filename):
         plt.ylabel("Pitch classes")
         plt.savefig(f"charts/{filename}_{chord_types[i]}_Chord_Visualization.png", dpi = 300, bbox_inches = "tight")
         plt.clf()
+
+def display_viterbi(emissions, path, hop_time, filename):
+    names = [f"{n}{q}" for n in ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+                       for q in ['', 'm']]
+    time_scale = numpy.arange(emissions.shape[1]) * hop_time
+
+    plt.figure(figsize=(14, 6))
+    plt.imshow(
+        emissions,
+        origin = "lower",
+        aspect = "auto",
+        cmap = "magma",
+        extent = [time_scale[0], time_scale[-1], -0.5, 23.5]
+        )
+    raw = numpy.argmax(emissions, axis = 0)
+    plt.plot(time_scale, raw, '.', color = "gray", markersize = 2, label = "frame-wise argmax")
+    plt.plot(time_scale, path, color = "cyan", linewidth = 1.5,
+             drawstyle = "steps-post", label = "viterbi")
+    plt.colorbar(label = 'emission prob')
+    plt.yticks(numpy.arange(24), names, fontsize = 6)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Chord state")
+    plt.legend(loc = "upper right")
+    plt.savefig(f"charts/{filename}_Decode.png", dpi = 300, bbox_inches = "tight")
+    plt.clf()
