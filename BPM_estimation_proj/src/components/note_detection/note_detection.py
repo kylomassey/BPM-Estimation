@@ -1,5 +1,6 @@
 import librosa
 import numpy
+import scipy
 from .hmm_viterbi import scores_to_emissions, viterbi
 from .detection_tools import note_detection, match_chord
 from .adjustments import median_smoothing, diagonal_smoothing, downsample_time
@@ -60,7 +61,7 @@ def stft_chord_analyzer(path, filename):
 
 def cqt_chord_analyzer(path, filename):
     try:
-        y, sample_rate = librosa.load(path, sr=None)
+        y, sample_rate = librosa.load(path, sr=22050)
     except FileNotFoundError:
         print("File not found. Please check the file name and try again.")
         return True
@@ -77,6 +78,7 @@ def cqt_chord_analyzer(path, filename):
     display_spectrogram(cqt, hop_time, filename)
 
     chromagram = cqt.reshape(7,12,cqt.shape[1]).sum(axis=0)
+    chromagram = scipy.ndimage.uniform_filter1d(chromagram, size=10, axis=1)
 
     display_chromagram(chromagram, filename, hop_time)
 
