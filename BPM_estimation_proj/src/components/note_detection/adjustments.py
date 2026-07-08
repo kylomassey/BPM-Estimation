@@ -20,3 +20,10 @@ def diagonal_smoothing(ssm, filt_len = 20):
         diag_chroma = diag_chroma + extend_chroma[pos:(N + pos), pos:(M + pos)]
     diag_chroma = diag_chroma / filt_len
     return diag_chroma
+
+def downsample_time(chroma, factor):
+    chroma = numpy.asarray(chroma, dtype=numpy.float32)
+    n = chroma.shape[1]
+    usable = (n // factor) * factor
+    blocks = chroma[:,:usable].reshape(12, usable // factor, factor)
+    return blocks.mean(axis=2)
