@@ -69,7 +69,7 @@ def cqt_chord_analyzer(path, filename):
     y_harmonic, y_percussive = librosa.effects.hpss(y)
     tuning = librosa.estimate_tuning(y=y_harmonic, sr=sample_rate)
     fmin = librosa.note_to_hz('C1') * 2**(tuning / 12)
-    hop_len = 512
+    hop_len = 1024
     hop_time = hop_len/sample_rate
 
     cqt = numpy.abs(librosa.cqt(y_harmonic, hop_length=hop_len, fmin=fmin, tuning=None))
