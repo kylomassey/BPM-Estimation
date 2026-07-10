@@ -75,7 +75,13 @@ def cqt_chord_analyzer(path, filename):
 
     cqt = numpy.abs(librosa.cqt(y_harmonic, hop_length=hop_len, fmin=fmin, tuning=None))
 
-    display_spectrogram(cqt, hop_time, filename)
+    R = cqt.reshape(cqt.shape[0]//12, 12, -1)
+    bass = R[:3].sum(axis=0)
+    treble = R[3:].sum(axis=0)
+    w = .2
+    full = (w*bass) + ((1-w)*treble)
+
+    display_spectrogram(full, hop_time, filename)
 
     chromagram = cqt.reshape(7,12,cqt.shape[1]).sum(axis=0)
     chromagram = scipy.ndimage.uniform_filter1d(chromagram, size=10, axis=1)
