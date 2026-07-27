@@ -1,4 +1,8 @@
 __pycache__
+*.pyc
 *.png
 *.mp3
 *.wav
+desktop.ini
+.pytest_cache
+BPM_estimation_proj/.pytest_cache
