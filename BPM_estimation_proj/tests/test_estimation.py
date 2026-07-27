@@ -1,5 +1,6 @@
 import librosa
 import numpy
+import pytest
 
 from src.components.estimation import auto_correlation, harmonic_scoring, tempogram
 from src.components.spectrogram import spectrogram
@@ -100,3 +101,21 @@ def test_bpm_pipeline_recovers_known_click_track_tempo_at_different_tempo(click_
     estimated_bpm = _estimate_bpm_from_click_track(y, sample_rate)
 
     assert abs(estimated_bpm - true_bpm) <= 2.0
+
+
+@pytest.mark.parametrize("true_bpm", [128, 136, 140, 148, 156, 164, 172, 176])
+def test_bpm_pipeline_does_not_lock_onto_octave_alias(click_track_factory, true_bpm):
+    # Regression test for a real bug: harmonic_scoring's k // 2 backward
+    # lookup let a candidate steal credit from its own half-lag (double
+    # tempo) neighbor "for free," while the true fundamental only earned
+    # credit by reaching its own 2x/3x/4x multiples -- which get cut off
+    # by laghigh well before the alias's backward lookup does. That made
+    # roughly the 128-176 BPM range consistently lock onto exactly half
+    # the true tempo. Confirms it stays fixed.
+    sample_rate = 22050
+    y = click_track_factory(bpm=true_bpm, sample_rate=sample_rate, duration_s=15.0)
+
+    estimated_bpm = _estimate_bpm_from_click_track(y, sample_rate)
+
+    assert abs(estimated_bpm - true_bpm) <= 3.0
+    assert not (0.4 < estimated_bpm / true_bpm < 0.6)  # would indicate an octave-down lock

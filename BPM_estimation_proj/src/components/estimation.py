@@ -17,7 +17,7 @@ def harmonic_scoring(corr, laglow, laghigh):
     for k in range(laglow, laghigh + 1, 1):
         total = corr[k - laglow]
         if k // 2 > laglow:
-            total += corr[int(k / 2 - laglow)] * .5
+            total += corr[int(k / 2 - laglow)] * .25
         if k * 2 <= laghigh:
             total += corr[k * 2 - laglow] * .5
         if k * 3 <= laghigh:

@@ -38,6 +38,8 @@ Audio is loaded and manually split into overlapping frames (`librosa.util.frame`
 **2. BPM estimation (`components/bpm_estimation.py`, `estimation.py`, `novelty_curve.py`)**
 The spectrogram is split into frequency bands (`frequency_ranges.py`: sub-bass, bass, mid, presence, brilliance, etc.). Each band's energy is differentiated and half-wave rectified into an onset/novelty curve, then smoothed. Autocorrelation over a plausible BPM range (60–220 BPM) surfaces candidate periodicities; a harmonic-scoring pass re-weights each candidate by summing its half/double/triple/quadruple-tempo bins, which resolves the classic autocorrelation failure mode of locking onto a tempo octave (e.g. picking 60 BPM when the track is actually 120). A tempogram — autocorrelation recomputed over a sliding window across the whole track — cross-validates that the tempo estimate is stable rather than a one-off peak.
 
+Validated against `librosa.beat.beat_track` on synthetic click tracks with exactly known ground-truth tempo (`scripts/benchmark_bpm.py`): mean absolute error of **1.0 BPM** across 70–175 BPM, vs. 1.67 BPM for librosa on the same signals. An earlier version of the harmonic-scoring weights had a real octave-lock bug in the 128–176 BPM range (traced, reproduced, and fixed — see `tests/test_estimation.py::test_bpm_pipeline_does_not_lock_onto_octave_alias` for the regression test).
+
 **3. Chord recognition — two front ends**
 - *STFT path* (`note_detection/note_detection.py: stft_chord_analyzer`): folds the linear-frequency spectrogram into 12 pitch classes by mapping each FFT bin to its nearest MIDI pitch class (`note_detection/detection_tools.py`), producing a chromagram directly from the STFT.
 - *CQT path* (`cqt_chord_analyzer`): applies harmonic/percussive source separation, estimates the track's tuning offset, and computes a tuning-corrected Constant-Q Transform. The CQT bins are folded into a 12-bin chromagram with a tunable bass/treble weighting, which tends to track chord roots more cleanly than the STFT path.
@@ -78,10 +80,10 @@ BPM_estimation_proj/
 
 ```bash
 cd BPM_estimation_proj
-pip install librosa numpy scipy matplotlib
+pip install -r requirements.txt
 ```
 
-(Tested against librosa 0.11, numpy 2.4, scipy 1.17, matplotlib 3.10 — a pinned `requirements.txt` is on the roadmap below.)
+For running the test suite / benchmark script, install dev dependencies instead: `pip install -r requirements-dev.txt`.
 
 ## Usage
 
@@ -95,12 +97,23 @@ pip install librosa numpy scipy matplotlib
    - `2` for chord analysis (then `1` for CQT or `2` for STFT)
 4. Generated charts are saved to `BPM_estimation_proj/charts/`
 
+## Testing & validation
+
+```bash
+cd BPM_estimation_proj
+pip install -r requirements-dev.txt
+pytest -v
+```
+
+51 tests cover every DSP module individually (spectrogram, frequency bands, onset curve, autocorrelation/harmonic scoring/tempogram, chord templates, Viterbi decoding, adjustments, self-similarity matrix) plus end-to-end recovery of known tempos from synthetic click tracks.
+
+`python scripts/benchmark_bpm.py` runs a head-to-head comparison against `librosa.beat.beat_track` on synthetic click tracks spanning 70–175 BPM and saves a chart to `charts/bpm_baseline_comparison.png`.
+
 ## Roadmap
 
 Known gaps, in priority order:
 - **Pure functions + CLI:** `bpm_estimation` and the chord analyzers currently mix computation with `print`/`input` calls. Planned refactor separates computation into pure functions returning values, with I/O (including the interactive prompts above) moved to `main.py`, and an `argparse`-based CLI as an alternative to the interactive loop.
-- **Tests:** no automated tests yet; adding `pytest` tests against synthetic signals (known-frequency tones, known-BPM click tracks) is next.
-- **CI:** GitHub Actions workflow to run the test suite on push, once tests exist.
-- **Dependency pinning:** add `requirements.txt` / `pyproject.toml`.
+- **CI:** GitHub Actions workflow to run the test suite on push.
 - **7th-chord templates:** dominant 7th, minor 7th, and major 7th templates are already stubbed into `chord_templates()` but commented out pending accuracy validation against the triad-only baseline.
 - **Cleanup:** remove leftover debug `print` statements, dead/commented code, and inconsistent naming across modules.
+- **Tempogram octave bias:** `tempogram()`'s sliding-window harmonic scoring uses the same weighting as the single-shot estimator but over much shorter windows, and hasn't been benchmarked the way the main estimator has — worth auditing for the same class of bias.
